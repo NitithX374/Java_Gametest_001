@@ -1,0 +1,329 @@
+import javax.sound.sampled.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import Characters.CharacterAttributes;
+import Characters.Furina;
+import Characters.Opponent_01;
+import Characters.Skill;
+public class GameProject extends JPanel implements ActionListener, KeyListener {
+
+    private Timer timer;
+    private int charX = -75, charY = 220; // Initial position of the character
+    private int opponentX = 1100, opponentY = 220; // Position of the opponent
+    private Image backgroundImage;
+    private Image characterImage;
+    private Image opponentImage; // Opponent image
+    private int charWidth = 575, charHeight = 350; // Size of the character
+    private Clip backgroundClip;
+
+    // Character stats
+    private CharacterAttributes player;
+    private CharacterAttributes opponent;
+    private boolean opponentDefeated = false; // Flag to track if the opponent is defeated
+    private String defeatMessage = ""; // Message to display when opponent is defeated
+    private String evadeMessage = ""; // Message for evaded skill
+    private boolean showSkills = false; // Flag to show/hide skill list
+    private int turnCount = 0; // Turn counter
+    private String enemySkillMessage = ""; // Message for the enemy's skill cast
+    private Timer messageTimer;
+    private boolean shadowUsed = false; // Track if the opponent used "One with the shadow"
+    private boolean showStats = false; // Flag to show/hide character stats
+    public GameProject() {
+        // Timer to control the game loop, triggers every 15ms
+        timer = new Timer(15, this);
+        timer.start();
+
+        // Load images
+        backgroundImage = new ImageIcon("test_package\\image\\genshin_impact_4k_videos-21859.jpg").getImage(); // Replace with your background image path
+        characterImage = new ImageIcon("test_package\\image\\furina-character-avatar-profile-genshin-1.jpg").getImage(); // Replace with your character image path
+        opponentImage = new ImageIcon("test_package\\image\\Enemy_Fatui_Pyro_Agent.jpg").getImage(); // Replace with your opponent image path
+
+        // Add KeyListener to capture user input
+        setFocusable(true);
+        addKeyListener(this);
+
+        // Play background music
+        playBackgroundMusic("test_package\\image\\Fontaine.wav"); // Replace with your audio file path
+        FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
+        volumeControl.setValue(-30.0f); // Decrease volume (range: -80.0f to 6.0f)
+        
+    }
+    
+    private void showCharacterStats() {
+        // Create a dialog to display character stats
+        JDialog statsDialog = new JDialog();
+        statsDialog.setTitle("Character Stats");
+        statsDialog.setSize(300, 400);
+        statsDialog.setLayout(new GridLayout(0, 1)); // Vertical layout
+    
+        // Add stats to the dialog
+        statsDialog.add(new JLabel("HP: " + player.HP));
+        statsDialog.add(new JLabel("Element: " + player.getElement())); // Assuming getElement() method exists
+        statsDialog.add(new JLabel("Current Status: " + player.getStatus())); // Assuming getStatus() method exists
+        statsDialog.add(new JLabel("Passive: " + player.getPassive())); // Assuming getPassive() method exists
+    
+        // Attributes
+        // statsDialog.add(new JLabel("Strength: " + player.getStrength())); // Assuming getStrength() method exists
+        // statsDialog.add(new JLabel("Dexterity: " + player.getDexterity())); // Assuming getDexterity() method exists
+        // statsDialog.add(new JLabel("Intelligence: " + player.getIntelligence())); // Assuming getIntelligence() method exists
+        // statsDialog.add(new JLabel("Luck: " + player.getLuck())); // Assuming getLuck() method exists
+        // statsDialog.add(new JLabel("Agility: " + player.getAgility())); // Assuming getAgility() method exists
+        // statsDialog.add(new JLabel("Cute: 999999++")); // Fixed attribute for the character
+    
+        // Skill list
+        StringBuilder skillList = new StringBuilder("Skills:\n");
+        for (Skill skill : player.skills) {
+            skillList.append(skill.getName()).append(" (").append(skill.getType()).append(")\n");
+        }
+        statsDialog.add(new JLabel(skillList.toString()));
+    
+        // Make dialog modal and visible
+        statsDialog.setModal(true);
+        statsDialog.setVisible(true);
+    }
+    
+    // Method to play background music
+    private void playBackgroundMusic(String filePath) {
+        try {
+            File audioFile = new File(filePath);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+            backgroundClip = AudioSystem.getClip();
+            backgroundClip.open(audioStream);
+            backgroundClip.loop(Clip.LOOP_CONTINUOUSLY); // Loop the music continuously
+            backgroundClip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            System.err.println("Error playing audio file: " + e.getMessage());
+        }
+    }
+
+    // Override paintComponent to draw custom graphics
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Furina player = new Furina("Furina", 100, Furina.initializeSkills());
+        Opponent_01 opponent = new Opponent_01("Enemy_01", 1500, Opponent_01.initializeSkills());
+        g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+
+    // Draw the character image at updated position and size
+    g.drawImage(characterImage, charX, charY, charWidth, charHeight, this);
+
+    // Draw the opponent image if not defeated
+    if (!opponentDefeated) {
+        g.drawImage(opponentImage, opponentX, opponentY, charWidth, charHeight, this);
+    }
+
+    // Draw turn count
+    g.setColor(Color.BLACK);
+    g.drawString("Turn: " + turnCount, getWidth() / 2 - 25, 30); // Centered at the top
+
+    // Draw messages if applicable
+    g.setColor(new Color(0, 0, 0, 150)); // Semi-transparent black background
+    if (!defeatMessage.isEmpty()) {
+        g.fillRect(getWidth() / 2 - 200, 50, 400, 50); // Background for message
+        g.setColor(Color.WHITE);
+        g.drawString(defeatMessage, getWidth() / 2 - 190, 80);
+    }
+
+    if (!evadeMessage.isEmpty()) {
+        g.fillRect(getWidth() / 2 - 200, 110, 400, 50); // Background for evade message
+        g.setColor(Color.WHITE);
+        g.drawString(evadeMessage, getWidth() / 2 - 190, 140);
+    }
+
+    // Draw HP for character and opponent
+    g.setColor(Color.BLACK);
+    g.drawString("Your HP: " + player.HP, 50, 50);
+    g.drawString("Opponent HP: " + opponent.HP, 50, 70);
+
+    // Draw skill list if visible
+    if (showSkills) {
+        int y = 200; // Starting Y position for skill list
+        g.setColor(Color.WHITE);
+        g.fillRect(680, 550, 300, 200); // Background for skill list
+        g.setColor(Color.BLACK);
+        g.drawRect(680, 550, 300, 200); // Border for skill list
+        g.drawString("Skills:", 683, 565);
+        for (int i = 0; i < player.skills.size(); i++) {
+            Skill skill = player.skills.get(i);
+            g.drawString((i + 1) + ". " + skill.getName() + " (" + skill.getType() + " Damage: " + skill.getDamage() + ")", 685, 550 + 40 + (i * 20));
+        }
+    }
+
+    // Draw enemy skill message if applicable
+    if (!enemySkillMessage.isEmpty()) {
+        g.setColor(new Color(0, 0, 0, 150)); // Semi-transparent black background
+        g.fillRect(getWidth() / 2 - 200, 250, 400, 50); // Background for enemy message
+        g.setColor(Color.WHITE);
+        g.drawString(enemySkillMessage, getWidth() / 2 - 190, 280);
+    }
+    if (showStats) {
+        g.setColor(Color.WHITE);
+        g.fillRect(50, 100, 300, 250); // Background for stats
+        g.setColor(Color.BLACK);
+        g.drawRect(50, 100, 300, 250); // Border for stats
+        g.drawString("Character Stats:", 60, 120);
+        g.drawString("HP: " + player.HP, 60, 160);
+        g.drawString("Element: " + player.getElement(), 60, 180);
+        g.drawString("Current Status: " + null, 60, 200);
+        g.drawString("Passive Ability: " + null, 60, 220);
+        g.drawString("Strength: 10", 60, 240);
+        g.drawString("Dexterity: 10", 60, 260);
+        g.drawString("Intelligence: 10", 60, 280);
+        g.drawString("Luck: 10", 60, 300);
+        g.drawString("Agility: 10", 60, 320);
+        g.drawString("Cute: 999999++", 60, 340);
+    }
+}
+    
+
+
+    // This method is called automatically every time the timer triggers
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // Check if character has moved to the right edge
+        if (charX + charWidth > getWidth()) {
+            // Switch to the start menu
+            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            StartMenu.showMenu(topFrame); // Go back to the start menu
+            return; // Exit the actionPerformed method
+        }
+
+        // Repaint the screen
+        repaint();
+    }
+
+    // Handle key press events
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
+
+        // Show skills if 'H' is pressed
+        if (key == KeyEvent.VK_H) {
+            showSkills = !showSkills; // Toggle skill list visibility
+        }
+        if (key == KeyEvent.VK_I) {
+            showStats = !showStats; // Toggle character stats visibility
+        }
+
+        // Use Ice Blast skill if '2' is pressed
+        if (key == KeyEvent.VK_2 && !opponentDefeated) {
+            player.castSkill(opponent, player.skills.get(1)); // Ice Blast
+            opponentTurn();
+            turnCount++; // Increment turn count
+        }
+
+        // Use Fireball skill if '1' is pressed
+        if (key == KeyEvent.VK_1 && !opponentDefeated) {
+            player.castSkill(opponent, player.skills.get(0)); // Fireball
+            opponentTurn();
+            turnCount++; // Increment turn count
+        }
+
+        // Use Thunder Strike skill if '3' is pressed
+        if (key == KeyEvent.VK_3 && !opponentDefeated) {
+            player.castSkill(opponent, player.skills.get(2)); // Thunder Strike
+            opponentTurn();
+            turnCount++; // Increment turn count
+        }
+
+        // Modify position
+        if (key == KeyEvent.VK_LEFT) {
+            charX -= 10; // Move left
+        }
+        if (key == KeyEvent.VK_RIGHT) {
+            charX += 10; // Move right
+        }
+        if (key == KeyEvent.VK_UP) {
+            charY -= 10; // Move up
+        }
+        if (key == KeyEvent.VK_DOWN) {
+            charY += 10; // Move down
+        }
+    }
+
+    private void startMessageTimer() {
+        if (messageTimer != null) {
+            messageTimer.stop(); // Stop previous timer if running
+        }
+        messageTimer = new Timer(1000, e -> {
+            enemySkillMessage = ""; // Clear message after 1 second
+            messageTimer.stop(); // Stop the timer
+        });
+        messageTimer.setRepeats(false); // Only run once
+        messageTimer.start(); // Start the timer
+    }
+
+    private void opponentTurn() {
+        if (!opponentDefeated) {
+            // Randomly choose a skill from the opponent's skills list
+            int skillIndex = (int) (Math.random() * opponent.getSkills().size());
+            Skill opponentSkill = opponent.getSkills().get(skillIndex);
+        
+            // Set the message for the enemy's skill
+            enemySkillMessage = opponentSkill.getName() + " was cast!";
+        
+            // Handle specific skills
+            switch (opponentSkill.getName()) {
+                case "Normal Attack":
+                    player.HP -= calculateDamage(10); // No damage from Normal Attack
+                    break;
+                case "One with the Shadow":
+                    shadowUsed = true; // Mark that shadow skill was used
+                    break;
+                case "Debt Collector":
+                    if (shadowUsed) {
+                        player.HP -= calculateDamage(opponentSkill.getDamage());
+                    }
+                    break;
+                default:
+                    // Handle other skills if needed
+                    break;
+            }
+        
+            // Check if opponent's HP drops to 0 or below
+            if (opponent.HP <= 0) {
+                opponentDefeated = true; // Set the opponent as defeated
+                defeatMessage = "You have defeated the enemy!";
+            }
+        
+            // Check if player's HP drops to 0 or below
+            if (player.HP <= 0) {
+                player.HP = 100; // Revive character
+                defeatMessage = "The cutie cannot be defeated!";
+            }
+        
+            // Start timer to clear enemy message
+            startMessageTimer();
+        }
+    }
+    
+    
+    
+    
+
+    private int calculateDamage(int baseDamage) {
+        // Apply passive ability to reduce damage
+        return (int) (baseDamage * 0.5); // 99% damage reduction
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {}
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    // Create the game window
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Simple Game Project");
+        GameProject game = new GameProject();
+
+        frame.add(game);
+        frame.setSize(1700, 800); // Set the size of the window
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
+}

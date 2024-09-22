@@ -4,22 +4,27 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import Characters.CharacterAttributes;
+import Characters.Furina;
+import Characters.Opponent_01;
+import Characters.Opponent_02;
+import Characters.Skill;
 
 public class GameProject extends JPanel implements ActionListener, KeyListener {
 
-    private Timer timer;
-    private int charX = -75, charY = 220; // Initial position of the character
+    protected Timer timer;
+    protected int charX = -75; // Initial position of the character
+    protected int charY = 220;
     private int opponentX = 1100, opponentY = 220; // Position of the opponent
     private Image backgroundImage;
-    private Image characterImage;
+    protected Image characterImage;
     private Image opponentImage; // Opponent image
-    private int charWidth = 575, charHeight = 350; // Size of the character
+    protected int charWidth = 575; // Size of the character
+    protected int charHeight = 350;
     private Clip backgroundClip;
 
     // Character stats
-    private CharacterAttributes player;
+    protected CharacterAttributes player;
     private CharacterAttributes opponent;
     private boolean opponentDefeated = false; // Flag to track if the opponent is defeated
     private String defeatMessage = ""; // Message to display when opponent is defeated
@@ -29,42 +34,65 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
     private String enemySkillMessage = ""; // Message for the enemy's skill cast
     private Timer messageTimer;
     private boolean shadowUsed = false; // Track if the opponent used "One with the shadow"
+    private boolean showStats = false; // Flag to show/hide character stats
+    private int currentStage = 1;
 
     public GameProject() {
+        player = new Furina("Furina", 100, Furina.initializeSkills());
+        opponent = new Opponent_01("Enemy_01", 1500, Opponent_01.initializeSkills());
         // Timer to control the game loop, triggers every 15ms
         timer = new Timer(15, this);
         timer.start();
 
         // Load images
-        backgroundImage = new ImageIcon("test_package\\image\\161b80f45fd83e31559a2b057dc1f58e.jpg").getImage(); // Replace with your background image path
-        characterImage = new ImageIcon("test_package\\image\\furina-character-avatar-profile-genshin-1.jpg").getImage(); // Replace with your character image path
-        opponentImage = new ImageIcon("test_package\\image\\Enemy_Fatui_Pyro_Agent.jpg").getImage(); // Replace with your opponent image path
+        backgroundImage = new ImageIcon("test_package\\image\\genshin_impact_4k_videos-21859.jpg").getImage(); // Background image path
+        characterImage = new ImageIcon("test_package\\image\\furina-character-avatar-profile-genshin-1.jpg").getImage(); // Character image path
+        opponentImage = new ImageIcon("test_package\\image\\Enemy_Fatui_Pyro_Agent.jpg").getImage(); // Opponent image path
 
         // Add KeyListener to capture user input
         setFocusable(true);
         addKeyListener(this);
 
-        // Initialize player and opponent attributes
-        List<Skill> playerSkills = new ArrayList<>();
-        playerSkills.add(new Skill("Fireball", "Pyro", 200));
-        playerSkills.add(new Skill("Ice Blast", "Cryo", 150));
-        playerSkills.add(new Skill("Thunder Strike", "Electro", 350));
-        player = new CharacterAttributes("Hero", 100, playerSkills);
-
-        List<Skill> opponentSkills = new ArrayList<>();
-        opponentSkills.add(new Skill("Normal Attack", "Element One", 0)); // Damage will be handled separately
-        opponentSkills.add(new Skill("One with the Shadow", "Element Two", 0)); // No direct damage
-        opponentSkills.add(new Skill("Debt Collector", "Pyro", 270)); // Damage is handled after shadow skill
-        opponent = new CharacterAttributes("Enemy", 1500, opponentSkills);
-
         // Play background music
-        playBackgroundMusic("test_package\\image\\Fontaine.wav"); // Replace with your audio file path
+        playBackgroundMusic("test_package\\image\\Fontaine.wav"); // Background music path
         FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
-        volumeControl.setValue(-30.0f); // Decrease volume (range: -80.0f to 6.0f)
+        volumeControl.setValue(-30.0f); // Decrease volume
+    }
+    private void stopBackgroundMusic() {
+        if (backgroundClip != null && backgroundClip.isRunning()) {
+            backgroundClip.stop(); // Stop the music
+            backgroundClip.close(); // Close the clip to release resources
+        }
+    }
+    
+    
+    private void showCharacterStats() {
+        // Create a dialog to display character stats
+        JDialog statsDialog = new JDialog();
+        statsDialog.setTitle("Character Stats");
+        statsDialog.setSize(300, 400);
+        statsDialog.setLayout(new GridLayout(0, 1)); // Vertical layout
+
+        // Add stats to the dialog
+        statsDialog.add(new JLabel("HP: " + player.HP));
+        statsDialog.add(new JLabel("Element: " + player.getElement())); // Assuming getElement() method exists
+        statsDialog.add(new JLabel("Current Status: " + player.getStatus())); // Assuming getStatus() method exists
+        statsDialog.add(new JLabel("Passive: " + player.getPassive())); // Assuming getPassive() method exists
+
+        // Skill list
+        StringBuilder skillList = new StringBuilder("Skills:\n");
+        for (Skill skill : player.skills) {
+            skillList.append(skill.getName()).append(" (").append(skill.getType()).append(")\n");
+        }
+        statsDialog.add(new JLabel(skillList.toString()));
+
+        // Make dialog modal and visible
+        statsDialog.setModal(true);
+        statsDialog.setVisible(true);
     }
 
     // Method to play background music
-    private void playBackgroundMusic(String filePath) {
+    protected void playBackgroundMusic(String filePath) {
         try {
             File audioFile = new File(filePath);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
@@ -81,8 +109,6 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        // Draw the background image
         g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
 
         // Draw the character image at updated position and size
@@ -97,7 +123,7 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
         g.setColor(Color.BLACK);
         g.drawString("Turn: " + turnCount, getWidth() / 2 - 25, 30); // Centered at the top
 
-        // Draw messages if applicable, using slightly transparent black
+        // Draw messages if applicable
         g.setColor(new Color(0, 0, 0, 150)); // Semi-transparent black background
         if (!defeatMessage.isEmpty()) {
             g.fillRect(getWidth() / 2 - 200, 50, 400, 50); // Background for message
@@ -126,7 +152,7 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
             g.drawString("Skills:", 683, 565);
             for (int i = 0; i < player.skills.size(); i++) {
                 Skill skill = player.skills.get(i);
-                g.drawString((i + 1) + ". " + skill.name + " (" + skill.element + " Damage: " + skill.damage + ")", 685, 550 + 40 + (i * 20));
+                g.drawString((i + 1) + ". " + skill.getName() + " (" + skill.getType() + " Damage: " + skill.getDamage() + ")", 685, 550 + 40 + (i * 20));
             }
         }
 
@@ -137,126 +163,149 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
             g.setColor(Color.WHITE);
             g.drawString(enemySkillMessage, getWidth() / 2 - 190, 280);
         }
+
+        // Draw character stats if visible
+        if (showStats) {
+            g.setColor(Color.WHITE);
+            g.fillRect(50, 100, 300, 250); // Background for stats
+            g.setColor(Color.BLACK);
+            g.drawRect(50, 100, 300, 250); // Border for stats
+            g.drawString("Character Stats:", 60, 120);
+            g.drawString("HP: " + player.HP, 60, 160);
+            g.drawString("Element: " + player.getElement(), 60, 180);
+            g.drawString("Current Status: " + player.getStatus(), 60, 200);
+            g.drawString("Passive Ability: " + player.getPassive(), 60, 220);
+            g.drawString("Strength: 10", 60, 240);
+            g.drawString("Dexterity: 10", 60, 260);
+            g.drawString("Intelligence: 10", 60, 280);
+            g.drawString("Luck: 10", 60, 300);
+            g.drawString("Agility: 10", 60, 320);
+            g.drawString("Cute: 999999++", 60, 340);
+        }
     }
 
     // This method is called automatically every time the timer triggers
     @Override
-    public void actionPerformed(ActionEvent e) {
-        // Check if character has moved to the right edge
-        if (charX + charWidth > getWidth()) {
-            // Switch to the start menu
-            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            StartMenu.showMenu(topFrame); // Go back to the start menu
-            return; // Exit the actionPerformed method
-        }
-
-        // Repaint the screen
-        repaint();
+public void actionPerformed(ActionEvent e) {
+    // Check if character has moved to the right edge of stage 1
+    if (charX + charWidth > getWidth()) {
+        // Stop the current background music
+        stopBackgroundMusic();
+        currentStage+=1;
+        // Change background image and music
+        backgroundImage = new ImageIcon("test_package\\image\\130544231.jpg").getImage(); // New background image
+        playBackgroundMusic("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav"); // New background music
+        
+        FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
+        volumeControl.setValue(-30.0f); // Decrease volume
+        charX = -75; 
     }
+    
+    // Repaint the screen
+    repaint();
+}
 
-    // Handle key press events
+
+    
+
+    
+    // Handle key presses for skill activation and stats display
     @Override
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
-
-        // Show skills if 'H' is pressed
-        if (key == KeyEvent.VK_H) {
-            showSkills = !showSkills; // Toggle skill list visibility
+        if (key == KeyEvent.VK_LEFT) {
+            charX -= 100; // Move left by 5 pixels
         }
-
-        // Use Ice Blast skill if '2' is pressed
-        if (key == KeyEvent.VK_2 && !opponentDefeated) {
-            player.castSkill(opponent, player.skills.get(1)); // Ice Blast
-            opponentTurn();
-            turnCount++; // Increment turn count
+        // Move character right
+        if (key == KeyEvent.VK_RIGHT) {
+            charX += 100; // Move right by 5 pixels
         }
-
-        // Use Fireball skill if '1' is pressed
         if (key == KeyEvent.VK_1 && !opponentDefeated) {
             player.castSkill(opponent, player.skills.get(0)); // Fireball
             opponentTurn();
-            turnCount++; // Increment turn count
+            turnCount++; // Increment turn count after opponent's turn
         }
-
-        // Use Thunder Strike skill if '3' is pressed
-        if (key == KeyEvent.VK_3 && !opponentDefeated) {
-            player.castSkill(opponent, player.skills.get(2)); // Thunder Strike
+        if (key == KeyEvent.VK_2 && !opponentDefeated) {
+            player.castSkill(opponent, player.skills.get(1)); // Skill 2
             opponentTurn();
-            turnCount++; // Increment turn count
+            turnCount++;
         }
-
-        // Modify position
-        if (key == KeyEvent.VK_LEFT) {
-            charX -= 10; // Move left
+        if (key == KeyEvent.VK_3 && !opponentDefeated) {
+            player.castSkill(opponent, player.skills.get(2)); // Skill 3
+            opponentTurn();
+            turnCount++;
         }
-        if (key == KeyEvent.VK_RIGHT) {
-            charX += 10; // Move right
+        if (key == KeyEvent.VK_I) {
+            showStats = !showStats; // Toggle character stats
         }
-        if (key == KeyEvent.VK_UP) {
-            charY -= 10; // Move up
-        }
-        if (key == KeyEvent.VK_DOWN) {
-            charY += 10; // Move down
+        if (key == KeyEvent.VK_H) {
+            showSkills = !showSkills; // Toggle skill list
         }
     }
 
     private void startMessageTimer() {
-        if (messageTimer != null) {
-            messageTimer.stop(); // Stop previous timer if running
-        }
-        messageTimer = new Timer(1000, e -> {
-            enemySkillMessage = ""; // Clear message after 1 second
-            messageTimer.stop(); // Stop the timer
-        });
-        messageTimer.setRepeats(false); // Only run once
-        messageTimer.start(); // Start the timer
+        messageTimer = new Timer(3000, e -> enemySkillMessage = ""); // Clear message after 3 seconds
+        messageTimer.setRepeats(false); // Only execute once
+        messageTimer.start();
     }
 
     private void opponentTurn() {
-        // Simple opponent logic
         if (!opponentDefeated) {
-            // Randomly choose a skill (for simplicity)
-            int skillIndex = (int) (Math.random() * opponent.skills.size());
-            Skill opponentSkill = opponent.skills.get(skillIndex);
-
-            // Set the message for the enemy's skill
-            enemySkillMessage = opponentSkill.name + " was cast!";
-
-            if (opponentSkill.name.equals("Normal Attack")) {
-                player.HP -= calculateDamage(0); // No damage from Normal Attack, can add logic if needed
-            } else if (opponentSkill.name.equals("One with the Shadow")) {
-                shadowUsed = true; // Mark that shadow skill was used
-            } else if (opponentSkill.name.equals("Debt Collector") && shadowUsed) {
-                player.HP -= calculateDamage(opponentSkill.damage);
+            int skillIndex = (int) (Math.random() * opponent.getSkills().size());
+            Skill opponentSkill = opponent.getSkills().get(skillIndex);
+            enemySkillMessage = opponentSkill.getName() + " was cast!";
+    
+            // Logic for opponent skill effects
+            switch (opponentSkill.getName()) {
+                case "Normal Attack":
+                    player.HP -= 10; // Reduce player's HP for Normal Attack
+                    break;
+                case "One with the Shadow":
+                    shadowUsed = true; // Mark that shadow skill was used
+                    break;
+                case "Debt Collector":
+                    if (shadowUsed) {
+                        player.HP -= opponentSkill.getDamage(); // Reduce player's HP if shadow skill was used
+                    }
+                    break;
+                default:
+                    // Handle other skills if needed
+                    break;
             }
-
-            // Check if character HP drops to 0 or below
-            if (player.isDefeated()) {
-                player.HP = 100; // Revive character
+    
+            // Check if player's HP drops to 0 or below
+            if (player.HP <= 0) {
+                player.HP=100;
                 defeatMessage = "The cutie cannot be defeated!";
             }
-
-            startMessageTimer(); // Start timer to clear enemy message
+    
+            // Check if opponent's HP drops to 0 or below
+            if (opponent.HP <= 0) {
+                opponentDefeated = true; // Set the opponent as defeated
+                defeatMessage = "You have defeated the enemy!";
+            }
+    
+            // Start message timer to clear the enemy skill message
+            startMessageTimer();
         }
     }
+    
 
-    private int calculateDamage(int baseDamage) {
-        // Apply passive ability to reduce damage
-        return (int) (baseDamage * 0.2); // 99% damage reduction
+    @Override
+    public void keyReleased(KeyEvent e) {
+        // Not used, but required by KeyListener interface
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {}
-    @Override
-    public void keyTyped(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {
+        // Not used, but required by KeyListener interface
+    }
 
-    // Create the game window
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Simple Game Project");
+        JFrame frame = new JFrame("Game Project");
         GameProject game = new GameProject();
-
         frame.add(game);
-        frame.setSize(1700, 800); // Set the size of the window
+        frame.setSize(800, 600); // Adjust the size as needed
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
