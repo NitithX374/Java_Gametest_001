@@ -1,0 +1,79 @@
+@Override
+    public void actionPerformed(ActionEvent e) {
+        if (charX + charWidth > getWidth()) {
+            // Switch to the game panel
+            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            Stage_02 stage_02 = new Stage_02(player); // Create a new game panel instance
+            topFrame.setContentPane(stage_02); // Switch to your game panel
+            topFrame.revalidate(); // Refresh the frame
+            topFrame.repaint(); // Optional: repaint the frame to ensure the game displays properly
+            stage_02.requestFocusInWindow(); // Request focus for key events
+        
+    }
+}
+
+
+
+    @Override
+public void actionPerformed(ActionEvent e) {
+    // Check if character has moved to the right edge of stage 1
+    if (charX + charWidth > getWidth()) {
+        // Stop the current background music
+        stopBackgroundMusic();
+        currentStage+=1;
+        // Change background image and music
+        backgroundImage = new ImageIcon("test_package\\image\\130544231.jpg").getImage(); // New background image
+        playBackgroundMusic("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav"); // New background music
+        
+        FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
+        volumeControl.setValue(-30.0f); // Decrease volume
+        charX = -75; 
+    }
+    // Repaint the screen
+    repaint();
+}
+@Override
+public void actionPerformed(ActionEvent e) {
+    // Check if character has moved to the right edge of stage 1
+    if (charX + charWidth > getWidth()) {
+        // Stop the current background music
+        stopBackgroundMusic();
+        currentStage += 1;
+        
+        // Change background image and music for the new stage
+        backgroundImage = new ImageIcon("test_package\\image\\130544231.jpg").getImage(); // New background image
+        playBackgroundMusic("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav"); // New background music
+        
+        FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
+        volumeControl.setValue(-30.0f); // Decrease volume
+        charX = -75; // Reset character position for the new stage
+    }
+    // Repaint the screen to reflect any changes in the current stage
+    repaint();
+}
+@Override
+public void actionPerformed(ActionEvent e) {
+    // Check if character has moved to the right edge of the stage
+    if (charX + charWidth > getWidth()) {
+        System.out.println("Character reached the right edge. Switching to Stage_02...");
+
+        // Stop the current background music
+        stopBackgroundMusic();
+        terminate(); // Clear resources
+
+        // Create a new instance of Stage_02, passing any necessary parameters
+        Stage_02 stage_02 = new Stage_02(player); 
+
+        // Switch to the new stage panel
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (topFrame != null) {
+            topFrame.setContentPane(stage_02); // Set Stage_02 as the content pane
+            topFrame.revalidate(); // Refresh the frame
+            topFrame.repaint(); // Optional: repaint the frame to ensure it displays properly
+            stage_02.requestFocusInWindow(); // Request focus for key events
+        } else {
+            System.err.println("Error: Top frame is null.");
+        }
+    }
+}
+

@@ -15,29 +15,33 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
     protected Timer timer;
     protected int charX = -75; // Initial position of the character
     protected int charY = 220;
-    private int opponentX = 1100, opponentY = 220; // Position of the opponent
-    private Image backgroundImage;
+    protected int opponentX = 1100, opponentY = 220; // Position of the opponent
+    protected Image backgroundImage;
     protected Image characterImage;
-    private Image opponentImage; // Opponent image
+    protected Image opponentImage; // Opponent image
     protected int charWidth = 575; // Size of the character
     protected int charHeight = 350;
-    private Clip backgroundClip;
+    protected Clip backgroundClip;
 
     // Character stats
-    protected CharacterAttributes player;
-    private CharacterAttributes opponent;
-    private boolean opponentDefeated = false; // Flag to track if the opponent is defeated
-    private String defeatMessage = ""; // Message to display when opponent is defeated
-    private String evadeMessage = ""; // Message for evaded skill
-    private boolean showSkills = false; // Flag to show/hide skill list
-    private int turnCount = 0; // Turn counter
-    private String enemySkillMessage = ""; // Message for the enemy's skill cast
-    private Timer messageTimer;
-    private boolean shadowUsed = false; // Track if the opponent used "One with the shadow"
-    private boolean showStats = false; // Flag to show/hide character stats
-    private int currentStage = 1;
-
+    protected static CharacterAttributes player;
+    protected CharacterAttributes opponent;
+    public boolean opponentDefeated = false; // Flag to track if the opponent is defeated
+    protected String defeatMessage = ""; // Message to display when opponent is defeated
+    protected String evadeMessage = ""; // Message for evaded skill
+    protected boolean showSkills = false; // Flag to show/hide skill list
+    public int turnCount = 0; // Turn counter
+    protected String enemySkillMessage = ""; // Message for the enemy's skill cast
+    protected Timer messageTimer;
+    protected boolean shadowUsed = false; // Track if the opponent used "One with the shadow"
+    protected boolean showStats = false; // Flag to show/hide character stats
+    protected int currentStage = 1;
+    protected String ImPath = null;
+protected void getImage_(String Imagename){
+    this.ImPath = Imagename;
+}
     public GameProject() {
+        
         player = new Furina("Furina", 100, Furina.initializeSkills());
         opponent = new Opponent_01("Enemy_01", 1500, Opponent_01.initializeSkills());
         // Timer to control the game loop, triggers every 15ms
@@ -48,23 +52,50 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
         backgroundImage = new ImageIcon("test_package\\image\\genshin_impact_4k_videos-21859.jpg").getImage(); // Background image path
         characterImage = new ImageIcon("test_package\\image\\furina-character-avatar-profile-genshin-1.jpg").getImage(); // Character image path
         opponentImage = new ImageIcon("test_package\\image\\Enemy_Fatui_Pyro_Agent.jpg").getImage(); // Opponent image path
-
+        
         // Add KeyListener to capture user input
         setFocusable(true);
+        requestFocusInWindow();
         addKeyListener(this);
-
+        setFocusTraversalKeysEnabled(false);
         // Play background music
-        playBackgroundMusic("test_package\\image\\Fontaine.wav"); // Background music path
+        // Background music path
+        playBackgroundMusic("test_package\\image\\Fontaine.wav"); 
+        FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
+        volumeControl.setValue(-30.0f); // Decrease volume
+        
+    }
+    public void playMusic(boolean isPlaying){
+        playBackgroundMusic("test_package\\image\\Fontaine.wav"); 
         FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
         volumeControl.setValue(-30.0f); // Decrease volume
     }
-    private void stopBackgroundMusic() {
+    protected void stopBackgroundMusic() {
         if (backgroundClip != null && backgroundClip.isRunning()) {
-            backgroundClip.stop(); // Stop the music
+            backgroundClip.stop(); // Stop the clip
             backgroundClip.close(); // Close the clip to release resources
+            backgroundClip = null; // Reset the clip reference
+        }
+    }
+    protected void stopBackgroundMusic_() {
+        if (backgroundClip.isRunning()) {
+            backgroundClip.stop(); // Stop the clip
+            backgroundClip.close(); // Close the clip to release resources
+            backgroundClip = null; // Reset the clip reference
         }
     }
     
+    
+    
+public void focusGained(FocusEvent e) {
+    System.out.println("Focus gained by the component");
+}
+
+
+public void focusLost(FocusEvent e) {
+    System.out.println("Focus lost from the component");
+}
+
     
     private void showCharacterStats() {
         // Create a dialog to display character stats
@@ -185,40 +216,32 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
     }
 
     // This method is called automatically every time the timer triggers
-    @Override
-public void actionPerformed(ActionEvent e) {
-    // Check if character has moved to the right edge of stage 1
-    if (charX + charWidth > getWidth()) {
-        // Stop the current background music
-        stopBackgroundMusic();
-        currentStage+=1;
-        // Change background image and music
-        backgroundImage = new ImageIcon("test_package\\image\\130544231.jpg").getImage(); // New background image
-        playBackgroundMusic("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav"); // New background music
+//     @Override
+//     public void actionPerformed(ActionEvent e) {
+//         if (charX + charWidth > getWidth()) {
+//             // Switch to the game panel
+//             JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+//             Stage_02 stage_02 = new Stage_02(player); // Create a new game panel instance
+//             topFrame.setContentPane(stage_02); // Switch to your game panel
+//             topFrame.revalidate(); // Refresh the frame
+//             topFrame.repaint(); // Optional: repaint the frame to ensure the game displays properly
+//             stage_02.requestFocusInWindow(); // Request focus for key events
         
-        FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
-        volumeControl.setValue(-30.0f); // Decrease volume
-        charX = -75; 
-    }
-    
-    // Repaint the screen
-    repaint();
-}
+//     }
+// }
 
-
-    
-
-    
     // Handle key presses for skill activation and stats display
     @Override
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
         if (key == KeyEvent.VK_LEFT) {
-            charX -= 100; // Move left by 5 pixels
+            charX -= 100; // Move left by 100 pixels
+            charX = Math.max(charX, 0); // Prevent going off the left edge
         }
         // Move character right
         if (key == KeyEvent.VK_RIGHT) {
-            charX += 100; // Move right by 5 pixels
+            charX += 100; // Move right by 100 pixels
+            charX = Math.min(charX, getWidth() - 20); // Prevent going off the right edge
         }
         if (key == KeyEvent.VK_1 && !opponentDefeated) {
             player.castSkill(opponent, player.skills.get(0)); // Fireball
@@ -249,7 +272,7 @@ public void actionPerformed(ActionEvent e) {
         messageTimer.start();
     }
 
-    private void opponentTurn() {
+    protected void opponentTurn() {
         if (!opponentDefeated) {
             int skillIndex = (int) (Math.random() * opponent.getSkills().size());
             Skill opponentSkill = opponent.getSkills().get(skillIndex);
@@ -308,5 +331,36 @@ public void actionPerformed(ActionEvent e) {
         frame.setSize(800, 600); // Adjust the size as needed
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
+        game.playMusic(true);
+    }   
+    protected void terminate() {
+        if (backgroundClip != null && backgroundClip.isRunning()) {
+            backgroundClip.stop(); // Stop the previous background music
+            backgroundClip.close(); // Close the clip to release resources
+        }
     }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // Check if character has moved to the right edge of the stage
+        if (charX + charWidth > getWidth()) {
+            // Stop the current background music
+            // Create a new instance of Stage_02, passing any necessary parameters
+            Stage_02 stage_02 = new Stage_02(player); 
+            
+            // Switch to the new stage panel
+            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            topFrame.setContentPane(stage_02); // Set Stage_02 as the content pane
+            topFrame.revalidate(); // Refresh the frame to reflect changes
+            topFrame.repaint(); // Optional: repaint the frame
+    
+            stage_02.requestFocusInWindow(); 
+    
+            timer.stop(); // Stop the timer if needed
+        }
+        // Repaint the screen to reflect any changes in the current stage
+        repaint();
+    }
+    
 }
+

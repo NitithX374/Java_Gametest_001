@@ -32,19 +32,20 @@ public class StartMenu extends JPanel implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == startButton) {
-            // Switch to the game panel
-            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            GameProject gamePanel = new GameProject(); // Create a new game panel instance
-            topFrame.setContentPane(gamePanel); // Switch to your game panel
-            topFrame.revalidate(); // Refresh the frame
-            topFrame.repaint(); // Optional: repaint the frame to ensure the game displays properly
-            gamePanel.requestFocusInWindow(); // Request focus for key events
-        } else if (e.getSource() == exitButton) {
-            System.exit(0); // Exit the game
-        }
+public void actionPerformed(ActionEvent e) {
+    if (e.getSource() == startButton) {
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        GameProject gamePanel = new GameProject(); 
+        topFrame.setContentPane(gamePanel);
+        topFrame.revalidate();
+        topFrame.repaint();
+        gamePanel.requestFocusInWindow(); // Ensure gamePanel can capture key events
+    } else if (e.getSource() == exitButton) {
+        // Stop background music if needed here
+        System.exit(0);
     }
+}
+
 
     // Method to show the menu
     public static void showMenu(JFrame frame) {
