@@ -12,7 +12,6 @@ public class Stage_02 extends GameProject{
     private int opponentX = 1100, opponentY = 220; // Position of the opponent
     public Stage_02(CharacterAttributes player) {
         super();
-        terminate();
         this.player = player; // Set the player character
     
         // Initialize opponent
@@ -31,36 +30,26 @@ public class Stage_02 extends GameProject{
         // Set up timer for repaint
         timer = new Timer(15, e -> repaint());
         timer.start();
-    
+        // backgroundClip.stopByID(backgroundClip.musicID_01);
+        // backgroundClip = new Music_class("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav");
+        FloatControl volumeControl = (FloatControl) backgroundClip.clip.getControl(FloatControl.Type.MASTER_GAIN);
+            volumeControl.setValue(-30.0f); // Decrease volume
+        new Thread(() -> {
+            backgroundClip.play();
+        }).start();
         // Step 1: Adding KeyListener and setting focus (Place these lines here in the constructor)
         setFocusable(true); // Make sure the JPanel can receive focus
         addKeyListener(this); // Add KeyListener to the JPanel
         requestFocusInWindow(); // Request focus for key events
+        // new Thread(() -> {
+        //     backgroundClip = new Music_class("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav");
+        //     backgroundClip.play();
+        // }).start();
     }
     
     @Override
     public boolean requestFocusInWindow() {
         return super.requestFocusInWindow();
-    }
-    @Override
-    protected void playBackgroundMusic(String filePath) {
-        try {
-            // Stop and close the existing clip if already playing
-            if (backgroundClip != null && backgroundClip.isRunning()) {
-                backgroundClip.stop();
-                backgroundClip.close();
-            }
-            
-            // Initialize new clip
-            File audioFile = new File(filePath);
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
-            backgroundClip = AudioSystem.getClip();
-            backgroundClip.open(audioStream);
-            backgroundClip.loop(Clip.LOOP_CONTINUOUSLY); // Loop the music continuously
-            backgroundClip.start();
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-            System.err.println("Error playing audio file: " + e.getMessage());
-        }
     }
     
     
@@ -183,23 +172,24 @@ public class Stage_02 extends GameProject{
             revalidate();
             repaint();
         }
+    }@Override
+    public void actionPerformed(ActionEvent e){
+
     }
-    @Override
-    public void playMusic(boolean isPlaying){
-        playBackgroundMusic("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav"); 
-        FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
-        volumeControl.setValue(-30.0f); // Decrease volume
-    }
+    // @Override
+    // public void playMusic(boolean isPlaying){
+    //     playBackgroundMusic("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav"); 
+    //     FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
+    //     volumeControl.setValue(-30.0f); // Decrease volume
+    // }
     public static void main(String[] args) {
         JFrame frame = new JFrame("Game Project");
         Stage_02 game_02 = new Stage_02(player);
         frame.add(game_02);
+        
         frame.setSize(800, 600); // Adjust the size as needed
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
         game_02.requestFocusInWindow(); // Ensure focus is on the panel
-        game_02.playMusic(true);
-        
     }
-    
 }

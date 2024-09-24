@@ -21,7 +21,7 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
     protected Image opponentImage; // Opponent image
     protected int charWidth = 575; // Size of the character
     protected int charHeight = 350;
-    protected Clip backgroundClip;
+    protected static Music_class backgroundClip;
 
     // Character stats
     protected static CharacterAttributes player;
@@ -60,30 +60,30 @@ protected void getImage_(String Imagename){
         setFocusTraversalKeysEnabled(false);
         // Play background music
         // Background music path
-        playBackgroundMusic("test_package\\image\\Fontaine.wav"); 
-        FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
-        volumeControl.setValue(-30.0f); // Decrease volume
+        // playBackgroundMusic("test_package\\image\\Fontaine.wav"); 
+        // FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
+        // volumeControl.setValue(-30.0f); // Decrease volume
         
     }
-    public void playMusic(boolean isPlaying){
-        playBackgroundMusic("test_package\\image\\Fontaine.wav"); 
-        FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
-        volumeControl.setValue(-30.0f); // Decrease volume
-    }
-    protected void stopBackgroundMusic() {
-        if (backgroundClip != null && backgroundClip.isRunning()) {
-            backgroundClip.stop(); // Stop the clip
-            backgroundClip.close(); // Close the clip to release resources
-            backgroundClip = null; // Reset the clip reference
-        }
-    }
-    protected void stopBackgroundMusic_() {
-        if (backgroundClip.isRunning()) {
-            backgroundClip.stop(); // Stop the clip
-            backgroundClip.close(); // Close the clip to release resources
-            backgroundClip = null; // Reset the clip reference
-        }
-    }
+    // public void playMusic(boolean isPlaying){
+    //     playBackgroundMusic("test_package\\image\\Fontaine.wav"); 
+    //     FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
+    //     volumeControl.setValue(-30.0f); // Decrease volume
+    // }
+    // protected void stopBackgroundMusic() {
+    //     if (backgroundClip != null && backgroundClip.isRunning()) {
+    //         backgroundClip.stop(); // Stop the clip
+    //         backgroundClip.close(); // Close the clip to release resources
+    //         backgroundClip = null; // Reset the clip reference
+    //     }
+    // }
+    // protected void stopBackgroundMusic_() {
+    //     if (backgroundClip.isRunning()) {
+    //         backgroundClip.stop(); // Stop the clip
+    //         backgroundClip.close(); // Close the clip to release resources
+    //         backgroundClip = null; // Reset the clip reference
+    //     }
+    // }
     
     
     
@@ -123,18 +123,7 @@ public void focusLost(FocusEvent e) {
     }
 
     // Method to play background music
-    protected void playBackgroundMusic(String filePath) {
-        try {
-            File audioFile = new File(filePath);
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
-            backgroundClip = AudioSystem.getClip();
-            backgroundClip.open(audioStream);
-            backgroundClip.loop(Clip.LOOP_CONTINUOUSLY); // Loop the music continuously
-            backgroundClip.start();
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-            System.err.println("Error playing audio file: " + e.getMessage());
-        }
-    }
+    
 
     // Override paintComponent to draw custom graphics
     @Override
@@ -328,39 +317,68 @@ public void focusLost(FocusEvent e) {
         JFrame frame = new JFrame("Game Project");
         GameProject game = new GameProject();
         frame.add(game);
+        Music_class backgroundMusic = new Music_class("test_package\\image\\Fontaine.wav");
+        backgroundMusic.play();
+        try {
+            Thread.sleep(1000000); // Sleep for 10 seconds
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         frame.setSize(800, 600); // Adjust the size as needed
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
-        game.playMusic(true);
     }   
-    protected void terminate() {
-        if (backgroundClip != null && backgroundClip.isRunning()) {
-            backgroundClip.stop(); // Stop the previous background music
-            backgroundClip.close(); // Close the clip to release resources
-        }
-    }
+    // protected void terminate() {
+    //     this.backgroundClip=null;
+    //     this.backgroundImage=null;
+    //     if (backgroundClip != null && backgroundClip.isRunning()) {
+    //         backgroundClip.stop(); // Stop the previous background music
+    //         backgroundClip.close(); // Close the clip to release resources
+    //     }
+        
+    // }
     
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        // Check if character has moved to the right edge of the stage
-        if (charX + charWidth > getWidth()) {
-            // Stop the current background music
-            // Create a new instance of Stage_02, passing any necessary parameters
-            Stage_02 stage_02 = new Stage_02(player); 
+    // @Override
+    // public void actionPerformed(ActionEvent e) {
+    //     // Check if character has moved to the right edge of the stage
+    //     if (charX + charWidth > getWidth()) {
             
-            // Switch to the new stage panel
-            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            topFrame.setContentPane(stage_02); // Set Stage_02 as the content pane
-            topFrame.revalidate(); // Refresh the frame to reflect changes
-            topFrame.repaint(); // Optional: repaint the frame
-    
-            stage_02.requestFocusInWindow(); 
-    
-            timer.stop(); // Stop the timer if needed
+    //         // stopBackgroundMusic();
+    //         // Stop the current background music
+    //         // Create a new instance of Stage_02, passing any necessary parameters           
+    //         Stage_02 stage_02 = new Stage_02(player);
+            
+    //         // Switch to the new stage panel
+    //         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+    //         topFrame.setContentPane(stage_02); // Set Stage_02 as the content pane
+    //         topFrame.revalidate(); // Refresh the frame to reflect changed
+    //         stage_02.requestFocusInWindow();
+    //         timer.stop(); // Stop the timer if needed
+    //     }
+    //     // Repaint the screen to reflect any changes in the current stage
+    //     repaint();
+    // }
+    @Override
+public void actionPerformed(ActionEvent e) {
+    if (charX + charWidth > getWidth()) {
+        // Stop the current background music
+        if (backgroundClip != null) {
+            backgroundClip.stop(); // Ensure you stop any playing music
         }
-        // Repaint the screen to reflect any changes in the current stage
-        repaint();
+
+        // Switch to Stage_02
+        Stage_02 stage_02 = new Stage_02(player);
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        topFrame.setContentPane(stage_02);
+        topFrame.revalidate();
+        stage_02.requestFocusInWindow();
+        timer.stop();
     }
-    
+    repaint();
 }
+
+}
+
+
 
