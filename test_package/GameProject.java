@@ -32,8 +32,7 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
     public int turnCount = 0; // Turn counter
     protected String enemySkillMessage = ""; // Message for the enemy's skill cast
     protected Timer messageTimer;
-    protected boolean shadowUsed = false; // Track if the opponent used "One with the shadow"
-    protected boolean showStats = false; // Flag to show/hide character stats
+    protected boolean shadowUsed = false; // Track if the opponent used "One with the shadow
     protected int currentStage = 1;
     protected String ImPath = null;
 protected void getImage_(String Imagename){
@@ -185,7 +184,7 @@ public void focusLost(FocusEvent e) {
         }
 
         // Draw character stats if visible
-        if (showStats) {
+        if (CharacterAttributes.showStats) {
             g.setColor(Color.WHITE);
             g.fillRect(50, 100, 300, 250); // Background for stats
             g.setColor(Color.BLACK);
@@ -251,7 +250,7 @@ public void focusLost(FocusEvent e) {
         }
     }
         if (key == KeyEvent.VK_I) {
-            showStats = !showStats; // Toggle character stats
+            CharacterAttributes.showStats = !CharacterAttributes.showStats; // Toggle character stats
         }
         if (key == KeyEvent.VK_H) {
             Skill.showSkills = !Skill.showSkills; // Toggle skill list

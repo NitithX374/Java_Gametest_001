@@ -8,7 +8,7 @@ public class CharacterAttributes {
     public int ElementId;
     public String status;
     public int passiveID;
-    
+    public static boolean showStats = false;
     public CharacterAttributes(String name, int HP, List<Skill> skills) {
         this.name = name;
         this.HP = HP;

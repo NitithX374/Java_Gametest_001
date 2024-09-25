@@ -11,6 +11,7 @@ import Characters.Skill;
 public class Stage_02 extends GameProject{
     private int opponentX = 1100, opponentY = 220; // Position of the opponent
     private static boolean EnableSkill_01 = Skill.showSkills;
+    private static boolean EnableStat_01 = CharacterAttributes.showStats;
     public Stage_02(CharacterAttributes player) {
         super();
         // this.player = player; // Set the player character
@@ -113,7 +114,7 @@ public class Stage_02 extends GameProject{
         }
 
         // Draw character stats if visible
-        if (showStats) {
+        if (EnableStat_01) {
             g.setColor(Color.WHITE);
             g.fillRect(50, 100, 300, 250); // Background for stats
             g.setColor(Color.BLACK);
@@ -170,7 +171,7 @@ public class Stage_02 extends GameProject{
     }
         if (key == KeyEvent.VK_I) {
             System.out.println("Hehehhehehehe");
-            showStats = !showStats; // Toggle character stats
+            EnableStat_01 = !EnableStat_01; // Toggle character stats
         }
         if (key == KeyEvent.VK_H) {
             EnableSkill_01 = !EnableSkill_01; // Toggle skill list
