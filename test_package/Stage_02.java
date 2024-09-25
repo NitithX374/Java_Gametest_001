@@ -10,6 +10,7 @@ import Characters.Opponent_02;
 import Characters.Skill;
 public class Stage_02 extends GameProject{
     private int opponentX = 1100, opponentY = 220; // Position of the opponent
+    private static boolean EnableSkill_01 = Skill.showSkills;
     public Stage_02(CharacterAttributes player) {
         super();
         // this.player = player; // Set the player character
@@ -172,7 +173,7 @@ public class Stage_02 extends GameProject{
             showStats = !showStats; // Toggle character stats
         }
         if (key == KeyEvent.VK_H) {
-            Skill.showSkills = !Skill.showSkills; // Toggle skill list
+            EnableSkill_01 = !EnableSkill_01; // Toggle skill list
             repaint();
         }
     }
