@@ -6,7 +6,8 @@ import java.io.IOException;
 
 public class Music_class {
     String currentFilePath;
-    Clip clip;
+    static Clip clip;
+    public static boolean isPlayingRightnow = false;
     public String musicID_01 = "test_package\\image\\Fontaine.wav";
     public String musicID_02 = "test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav";
     public Music_class(String filePath) {
@@ -56,7 +57,12 @@ public class Music_class {
         }
     }
     // Method to start playing the music
+    public static void Playsong(){
+        isPlayingRightnow = !isPlayingRightnow;
+    }
     public void play() {
+        if(!isPlayingRightnow){
+            
         if (clip != null) {
             clip.start();
             System.out.println("Music started.");
@@ -69,6 +75,7 @@ public class Music_class {
             }
         } else {
             System.out.println("Clip is not initialized.");
+            }
         }
     }
 
@@ -84,6 +91,8 @@ public class Music_class {
 
     // Method to stop the music
     public void stop() {
+        if(isPlayingRightnow){
+            
         try {
             if (clip != null) {
                 clip.stop(); // Stop the clip
@@ -98,6 +107,7 @@ public class Music_class {
             e.printStackTrace();
         }
     }
+}
     public void stopByID(String filePath) {
         if (clip != null && filePath.equals(currentFilePath)) {
             stop(); // Stop if the file path matches
@@ -105,6 +115,7 @@ public class Music_class {
             System.out.println("No matching audio to stop for the given file path.");
         }
     }
+
     
 
     // Play background music continuously

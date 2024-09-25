@@ -15,7 +15,7 @@ public class Stage_02 extends GameProject{
     public Stage_02(CharacterAttributes player) {
         super();
         // this.player = player; // Set the player character
-    
+        
         // Initialize opponent
         opponent = new Opponent_02("New Enemy", 2000, Opponent_02.initializeSkills());
     
@@ -35,7 +35,7 @@ public class Stage_02 extends GameProject{
         // backgroundClip.stopByID(backgroundClip.musicID_01);
         backgroundClip = new Music_class("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav");
         FloatControl volumeControl = (FloatControl) backgroundClip.clip.getControl(FloatControl.Type.MASTER_GAIN);
-            volumeControl.setValue(0.0f); // Decrease volume
+            volumeControl.setValue(-30.0f); // Decrease volume
         new Thread(() -> {
             backgroundClip.play();
         }).start();

@@ -9,7 +9,7 @@ public class StartMenu extends JPanel implements ActionListener {
     private JButton startButton;
     private JButton exitButton;
     protected Music_class backgroundClip; // Keep a reference to the music class
-
+    public static boolean Isplaying_01=Music_class.isPlayingRightnow;
     public StartMenu() {
         // Set layout
         setLayout(new GridBagLayout());
@@ -72,12 +72,11 @@ public void actionPerformed(ActionEvent e) {
         topFrame.repaint();
         gamePanel.requestFocusInWindow();
         // Stop the current music if it's playing
-        
-        
         // Start the new music for stage_02
         backgroundClip = new Music_class("test_package\\image\\Fontaine.wav");
-        FloatControl volumeControl = (FloatControl) backgroundClip.clip.getControl(FloatControl.Type.MASTER_GAIN);
-            volumeControl.setValue(0.0f); // Decrease volume
+        // Music_class.Playsong();
+        FloatControl volumeControl = (FloatControl) Music_class.clip.getControl(FloatControl.Type.MASTER_GAIN);
+            volumeControl.setValue(-30.0f); // Decrease volume
         new Thread(() -> {
             backgroundClip.play();
         }).start();

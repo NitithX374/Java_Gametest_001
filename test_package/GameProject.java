@@ -22,7 +22,7 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
     protected int charWidth = 575; // Size of the character
     protected int charHeight = 350;
     protected static Music_class backgroundClip;
-
+    public static boolean Isplaying_02 = Music_class.isPlayingRightnow;
     // Character stats
     protected static CharacterAttributes player;
     protected CharacterAttributes opponent;
@@ -365,6 +365,13 @@ public void focusLost(FocusEvent e) {
     //     // Repaint the screen to reflect any changes in the current stage
     //     repaint();
     // }
+    // public void actionPerformed_() {
+    //     if (charX + charWidth > getWidth()-50) {
+    //     Music_class.Playsong();
+    //     FloatControl volumeControl = (FloatControl) backgroundClip.clip.getControl(FloatControl.Type.MASTER_GAIN);
+    //     volumeControl.setValue(-80.0f);
+    //     }
+    // }
     @Override
 public void actionPerformed(ActionEvent e) {
     if (charX + charWidth > getWidth()) {
@@ -372,8 +379,9 @@ public void actionPerformed(ActionEvent e) {
         // if (backgroundClip != null) {
         //     backgroundClip.stop(); // Ensure you stop any playing music
         // }
-
         // Switch to Stage_02
+        FloatControl volumeControl = (FloatControl) backgroundClip.clip.getControl(FloatControl.Type.MASTER_GAIN);
+        volumeControl.setValue(-80.0f);
         Stage_02 stage_02 = new Stage_02(player);
         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         topFrame.setContentPane(stage_02);
