@@ -28,8 +28,7 @@ public class GameProject extends JPanel implements ActionListener, KeyListener {
     protected CharacterAttributes opponent;
     public boolean opponentDefeated = false; // Flag to track if the opponent is defeated
     protected String defeatMessage = ""; // Message to display when opponent is defeated
-    protected String evadeMessage = ""; // Message for evaded skill
-    protected boolean showSkills = false; // Flag to show/hide skill list
+    protected String evadeMessage = ""; // Message for evaded skill // Flag to show/hide skill list
     public int turnCount = 0; // Turn counter
     protected String enemySkillMessage = ""; // Message for the enemy's skill cast
     protected Timer messageTimer;
@@ -163,7 +162,8 @@ public void focusLost(FocusEvent e) {
         g.drawString("Opponent HP: " + opponent.HP, 50, 70);
 
         // Draw skill list if visible
-        if (showSkills) {
+        if (Skill.showSkills) {
+            System.out.println("skill pressed");
             int y = 200; // Starting Y position for skill list
             g.setColor(Color.WHITE);
             g.fillRect(680, 550, 300, 200); // Background for skill list
@@ -223,6 +223,7 @@ public void focusLost(FocusEvent e) {
     @Override
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
+        
         if (key == KeyEvent.VK_LEFT) {
             charX -= 100; // Move left by 100 pixels
             charX = Math.max(charX, 0); // Prevent going off the left edge
@@ -232,6 +233,7 @@ public void focusLost(FocusEvent e) {
             charX += 100; // Move right by 100 pixels
             charX = Math.min(charX, getWidth() - 20); // Prevent going off the right edge
         }
+        if(Skill.showSkills==true){
         if (key == KeyEvent.VK_1 && !opponentDefeated) {
             player.castSkill(opponent, player.skills.get(0)); // Fireball
             opponentTurn();
@@ -247,11 +249,15 @@ public void focusLost(FocusEvent e) {
             opponentTurn();
             turnCount++;
         }
+    }
         if (key == KeyEvent.VK_I) {
             showStats = !showStats; // Toggle character stats
         }
         if (key == KeyEvent.VK_H) {
-            showSkills = !showSkills; // Toggle skill list
+            Skill.showSkills = !Skill.showSkills; // Toggle skill list
+            if (Skill.showSkills){
+                repaint();
+            }
         }
     }
 
@@ -294,6 +300,7 @@ public void focusLost(FocusEvent e) {
             // Check if opponent's HP drops to 0 or below
             if (opponent.HP <= 0) {
                 opponentDefeated = true; // Set the opponent as defeated
+                Skill.showSkills = false;
                 defeatMessage = "You have defeated the enemy!";
             }
     
@@ -313,22 +320,22 @@ public void focusLost(FocusEvent e) {
         // Not used, but required by KeyListener interface
     }
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Game Project");
-        GameProject game = new GameProject();
-        frame.add(game);
-        Music_class backgroundMusic = new Music_class("test_package\\image\\Fontaine.wav");
-        backgroundMusic.play();
-        try {
-            Thread.sleep(1000000); // Sleep for 10 seconds
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    // public static void main(String[] args) {
+    //     JFrame frame = new JFrame("Game Project");
+    //     GameProject game = new GameProject();
+    //     frame.add(game);
+    //     Music_class backgroundMusic = new Music_class("test_package\\image\\Fontaine.wav");
+    //     backgroundMusic.play();
+    //     try {
+    //         Thread.sleep(1000000); // Sleep for 10 seconds
+    //     } catch (InterruptedException e) {
+    //         e.printStackTrace();
+    //     }
 
-        frame.setSize(800, 600); // Adjust the size as needed
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-    }   
+    //     frame.setSize(800, 600); // Adjust the size as needed
+    //     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    //     frame.setVisible(true);
+    // }   
     // protected void terminate() {
     //     this.backgroundClip=null;
     //     this.backgroundImage=null;
@@ -363,9 +370,9 @@ public void focusLost(FocusEvent e) {
 public void actionPerformed(ActionEvent e) {
     if (charX + charWidth > getWidth()) {
         // Stop the current background music
-        if (backgroundClip != null) {
-            backgroundClip.stop(); // Ensure you stop any playing music
-        }
+        // if (backgroundClip != null) {
+        //     backgroundClip.stop(); // Ensure you stop any playing music
+        // }
 
         // Switch to Stage_02
         Stage_02 stage_02 = new Stage_02(player);

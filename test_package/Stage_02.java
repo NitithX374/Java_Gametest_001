@@ -12,7 +12,7 @@ public class Stage_02 extends GameProject{
     private int opponentX = 1100, opponentY = 220; // Position of the opponent
     public Stage_02(CharacterAttributes player) {
         super();
-        this.player = player; // Set the player character
+        // this.player = player; // Set the player character
     
         // Initialize opponent
         opponent = new Opponent_02("New Enemy", 2000, Opponent_02.initializeSkills());
@@ -31,16 +31,14 @@ public class Stage_02 extends GameProject{
         timer = new Timer(15, e -> repaint());
         timer.start();
         // backgroundClip.stopByID(backgroundClip.musicID_01);
-        // backgroundClip = new Music_class("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav");
+        backgroundClip = new Music_class("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav");
         FloatControl volumeControl = (FloatControl) backgroundClip.clip.getControl(FloatControl.Type.MASTER_GAIN);
-            volumeControl.setValue(-30.0f); // Decrease volume
+            volumeControl.setValue(0.0f); // Decrease volume
         new Thread(() -> {
             backgroundClip.play();
         }).start();
         // Step 1: Adding KeyListener and setting focus (Place these lines here in the constructor)
-        setFocusable(true); // Make sure the JPanel can receive focus
-        addKeyListener(this); // Add KeyListener to the JPanel
-        requestFocusInWindow(); // Request focus for key events
+        
         // new Thread(() -> {
         //     backgroundClip = new Music_class("test_package\\image\\Rapid as Wildfires — Liyue Battle Theme I _ Genshin Impact Original Soundtrack_ Liyue Chapter.wav");
         //     backgroundClip.play();
@@ -91,7 +89,7 @@ public class Stage_02 extends GameProject{
         g.drawString("Opponent HP: " + opponent.HP, 50, 70);
 
         // Draw skill list if visible
-        if (showSkills) {
+        if (Skill.showSkills) {
             System.out.println("Drawing Skill List"); // Confirm skills should be drawn
             int y = 200; // Starting Y position for skill list
             g.setColor(Color.WHITE);
@@ -139,14 +137,20 @@ public class Stage_02 extends GameProject{
     // Override other methods as needed for gameplay mechanics
     @Override
     public void keyPressed(KeyEvent e) {
+        boolCheck();
+        super.keyPressed(e); //EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+        System.out.println("Key Pressed: " + e.getKeyChar());
         int key = e.getKeyCode();
         if (key == KeyEvent.VK_LEFT) {
-            charX -= 100; // Move left by 5 pixels
+            charX -= 100; // Move left by 100 pixels
+            charX = Math.max(charX, 0); // Prevent going off the left edge
         }
         // Move character right
         if (key == KeyEvent.VK_RIGHT) {
-            charX += 100; // Move right by 5 pixels
+            charX += 100; // Move right by 100 pixels
+            charX = Math.min(charX, getWidth() - 20); // Prevent going off the right edge
         }
+        if(Skill.showSkills==true){
         if (key == KeyEvent.VK_1 && !opponentDefeated) {
             player.castSkill(opponent, player.skills.get(0)); // Fireball
             opponentTurn();
@@ -162,17 +166,25 @@ public class Stage_02 extends GameProject{
             opponentTurn();
             turnCount++;
         }
+    }
         if (key == KeyEvent.VK_I) {
+            System.out.println("Hehehhehehehe");
             showStats = !showStats; // Toggle character stats
-            revalidate();
-            repaint();
         }
         if (key == KeyEvent.VK_H) {
-            showSkills = !showSkills; // Toggle skill list
-            revalidate();
+            Skill.showSkills = !Skill.showSkills; // Toggle skill list
             repaint();
         }
-    }@Override
+    }
+    protected void boolCheck(){
+        if(Skill.showSkills==true){
+            System.out.println("Trueeeeeeeeeeeeeeeeeeeeee");
+            }
+        if(Skill.showSkills==false){
+            System.out.println("Falseeeeeeeeeeeeeeeeeeeeeee");
+            }
+    }
+    @Override
     public void actionPerformed(ActionEvent e){
 
     }
@@ -182,14 +194,14 @@ public class Stage_02 extends GameProject{
     //     FloatControl volumeControl = (FloatControl) backgroundClip.getControl(FloatControl.Type.MASTER_GAIN);
     //     volumeControl.setValue(-30.0f); // Decrease volume
     // }
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Game Project");
-        Stage_02 game_02 = new Stage_02(player);
-        frame.add(game_02);
-        
-        frame.setSize(800, 600); // Adjust the size as needed
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-        game_02.requestFocusInWindow(); // Ensure focus is on the panel
-    }
+    // public static void main(String[] args) {
+    //     JFrame frame = new JFrame("Game Project");
+    //     GameProject game_02 = new Stage_02(player);
+    //     System.out.println("Skill state : " + Skill.showSkills);
+    //     frame.add(game_02);
+    //     frame.setSize(800, 600); // Adjust the size as needed
+    //     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    //     frame.setVisible(true);
+    //     game_02.requestFocusInWindow(); // Ensure focus is on the panel
+    // }
 }

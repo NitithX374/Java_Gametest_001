@@ -72,14 +72,12 @@ public void actionPerformed(ActionEvent e) {
         topFrame.repaint();
         gamePanel.requestFocusInWindow();
         // Stop the current music if it's playing
-        if (backgroundClip != null) {
-            backgroundClip.stop();
-        }
+        
         
         // Start the new music for stage_02
         backgroundClip = new Music_class("test_package\\image\\Fontaine.wav");
         FloatControl volumeControl = (FloatControl) backgroundClip.clip.getControl(FloatControl.Type.MASTER_GAIN);
-            volumeControl.setValue(-30.0f); // Decrease volume
+            volumeControl.setValue(0.0f); // Decrease volume
         new Thread(() -> {
             backgroundClip.play();
         }).start();
